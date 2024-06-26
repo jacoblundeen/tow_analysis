@@ -21,21 +21,31 @@ if __name__ == "__main__":
     tow.replace({'player2_result': result_replace}, inplace=True)
     tow['player1_list_url'] = tow['player1_list_url'].str.lower()
     tow['player2_list_url'] = tow['player2_list_url'].str.lower()
-    tow['player1_subfaction'] = 'grand army'
-    tow['player2_subfaction'] = 'grand army'
-
-    tow.to_csv('tow_processed.csv', index=False)
+    tow['player1_subfaction'] = 'grand_army'
+    tow['player2_subfaction'] = 'grand_army'
 
     subfactions = ['mortuary cult', 'royal host', 'exiles', 'errantry crusade', 'nomadic waagh', 'troll horde']
+    subf_proper = ['mortuary_cult', 'royal_host', 'exiles', 'errantry_crusade', 'nomadic_waagh', 'troll_horde']
 
-    temp = tow[tow['player1_list_url'].str.contains("mortuary cult") == True].index.tolist()
-    # tow.at[temp.index.astype(int), 'player1_subfaction'] = 'mortuary cult'
-    print(temp)
+    for subfaction, subf in zip(subfactions, subf_proper):
+        player1_indices = tow[tow['player1_list_url'].str.contains(subfaction) == True].index.tolist()
+        player2_indices = tow[tow['player2_list_url'].str.contains(subfaction) == True].index.tolist()
+        tow.loc[player1_indices, 'player1_subfaction'] = subf
+        tow.loc[player2_indices, 'player2_subfaction'] = subf
 
-    # for subfaction in subfactions:
-    #     tow['player1_subfaction'] = tow['player2_subfaction'].where(tow['player1_list_url'].ne(subfaction),
-    #                                                                 subfaction)
-        # if tow['player1_list_url'].str.contains(subfaction).any():
-        #     tow['player1_subfaction'] = subfaction
+    tow = tow.query("`mirror_match` == 'N' & full_data == 'Y'")
 
-    # print(tow.query("player1_faction == 'O&G'")['player1_list_url'].head())
+    player1_db = tow[['player1_faction', 'player1_subfaction', 'player2_faction', 'player2_subfaction',
+                      'player1_result', 'points', 'rounds', 'ruleset', 'players']].rename(
+        columns={"player1_faction": "player_faction", "player2_faction": "opponent_faction",
+                 "player1_result": "result", "player1_subfaction": "player_subfaction",
+                 "player2_subfaction": "opponent_subfaction"})
+    player2_db = tow[
+        ['player2_faction', 'player2_subfaction', 'player1_faction', 'player1_subfaction', 'player2_result', 'points',
+         'rounds', 'ruleset', 'players']].rename(
+        columns={"player2_faction": "player_faction", "player1_faction": "opponent_faction",
+                 "player2_result": "result", "player2_subfaction": "player_subfaction",
+                 "player1_subfaction": "opponent_subfaction"})
+    tow_db = pd.concat([player1_db, player2_db], ignore_index=True)
+
+    tow_db.to_csv('tow_processed.csv', index=False)
