@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 if __name__ == "__main__":
-    tow = pd.read_excel('tow.xlsx')
+    tow = pd.read_excel('tow_16_june.xlsx')
 
     tow.columns = map(str.lower, tow.columns)
     tow.columns = tow.columns.str.replace(' ', '_')
@@ -50,4 +50,4 @@ if __name__ == "__main__":
     tow_db['result'].replace('', np.nan, inplace=True)
     tow_db.dropna(subset=['result'], inplace=True)
 
-    tow_db.to_csv('tow_processed.csv', index=False)
+    tow_db.to_csv('tow_processed_16_june.csv', index=False)
