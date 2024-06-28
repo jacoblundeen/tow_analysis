@@ -47,5 +47,7 @@ if __name__ == "__main__":
                  "player2_result": "result", "player2_subfaction": "player_subfaction",
                  "player1_subfaction": "opponent_subfaction"})
     tow_db = pd.concat([player1_db, player2_db], ignore_index=True)
+    tow_db['result'].replace('', np.nan, inplace=True)
+    tow_db.dropna(subset=['result'], inplace=True)
 
     tow_db.to_csv('tow_processed.csv', index=False)
